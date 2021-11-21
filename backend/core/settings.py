@@ -28,7 +28,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'accounts.apps.AccountsConfig'
+    'rest_framework_simplejwt.token_blacklist',
+    'accounts.apps.AccountsConfig',
+    'corsheaders'
 ]
 
 REST_FRAMEWORK = {
@@ -69,6 +71,7 @@ SIMPLE_JWT = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -103,12 +106,8 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'poetryphile',
-        'USER': 'aidan',
-        'PASSWORD': 'H@zelby4!',
-        'HOST': 'localhost',
-        'PORT': '5433'
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -157,3 +156,5 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.PoetAccount'
+
+CORS_ALLOW_ALL_ORIGINS = True
