@@ -35,6 +35,8 @@ def signupUser(request):
             return Response({ 'message': 'A user with this email already exists.' }, status=status.HTTP_400_BAD_REQUEST)
         if UserAccount.objects.filter(pen_name=pen_name).exists():
             return Response({ 'message': 'A user with this pen name already exists.' }, status=status.HTTP_400_BAD_REQUEST)
+        if password != re_password:
+            return Response({ 'message': 'Passwords do not match.' }, status=status.HTTP_400_BAD_REQUEST)
         user = UserAccount.objects.create_user(pen_name=pen_name, email=email, password=password)
         return Response({ 'message': 'Successfully signed up. Please login.' }, status=status.HTTP_201_CREATED)
     except:
