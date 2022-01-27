@@ -39,5 +39,6 @@ def signupUser(request):
             return Response({ 'message': 'Passwords do not match.' }, status=status.HTTP_400_BAD_REQUEST)
         user = UserAccount.objects.create_user(pen_name=pen_name, email=email, password=password)
         return Response({ 'message': 'Successfully signed up. Please login.' }, status=status.HTTP_201_CREATED)
-    except:
+    except Exception as e:
+        print(e)
         return Response({ 'message': 'Something went wrong.' }, status=status.HTTP_400_BAD_REQUEST)

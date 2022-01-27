@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ 'email': e.target.email.value, 'pen_name': e.target.penName.value, 'password': e.target.password.value, 're-password': e.target.rePassword.value })
+            body: JSON.stringify({ 'email': e.target.email.value, 'pen_name': e.target.penName.value, 'password': e.target.password.value, 're_password': e.target.rePassword.value })
         })
         let data = await response.json()
         if (response.status == 201) {
