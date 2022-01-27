@@ -7,6 +7,7 @@ import AboutPage from './pages/AboutPage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import MyPoemsPage from './pages/MyPoemsPage';
+import PoemPage from './pages/PoemPage';
 import Header from './components/Header';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route element={<RequiresAuth />}>
               <Route path='my_poems' element={<MyPoemsPage />} />
             </Route>
+            <Route path='poems/:poemId' element={<PoemPage />} />
             <Route
               path="*"
               element={

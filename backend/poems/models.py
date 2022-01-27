@@ -7,3 +7,4 @@ class Poem(models.Model):
     title = models.CharField(max_length=100, blank=True)
     text = models.TextField(blank=True)
     date_created = models.DateTimeField(default=timezone.now)
+    is_published = models.BooleanField(default=False)

@@ -26,3 +26,22 @@ def getMyPoems(request):
     poems = user.poem_set.all().order_by('-date_created')
     serializer = PoemSerializer(poems, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def getPoem(request, pk):
+    try:
+        poem = Poem.objects.select_related('user').get(id=pk)
+        if poem.is_published or poem.user == request.user:
+            serializer = PoemSerializer(poem, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response('You do not have access to view this poem.', status=status.HTTP_403_FORBIDDEN)
+    except:
+        return Response('This poem you are looking for does not exist.', status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def deletePoem(request, pk):
+    poem = Poem.objects.get(id=pk)
+    poem.delete()
+    return Response('Poem was deleted.', status=status.HTTP_200_OK)

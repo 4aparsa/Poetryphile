@@ -26,8 +26,6 @@ export const AuthProvider = ({ children }) => {
         let data = await response.json()
         if (response.status == 201) {
             navigate('/login')
-        } else {
-            console.log(data)
         }
     }
 
@@ -46,8 +44,6 @@ export const AuthProvider = ({ children }) => {
             setUser(jwt_decode(data.access))
             localStorage.setItem('authTokens', JSON.stringify(data))
             navigate('/')
-        } else {
-            console.log(data)
         }
     }
 
