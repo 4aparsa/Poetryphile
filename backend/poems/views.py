@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
@@ -19,13 +20,21 @@ def createPoem(request):
     serializer = PoemSerializer(poem, many=False)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 1
+    page_size_query_param = 'page_number'
+    max_page_size = 1
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getMyPoems(request):
     user = request.user
+    paginator = StandardResultsSetPagination()
     poems = user.poem_set.all().order_by('-date_created')
-    serializer = PoemSerializer(poems, many=True)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    poems_page = paginator.paginate_queryset(poems, request)
+    serializer = PoemSerializer(poems_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+    # Response(serializer.data, )
 
 @api_view(['GET'])
 def getPoem(request, pk):

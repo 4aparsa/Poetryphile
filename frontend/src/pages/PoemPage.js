@@ -4,6 +4,8 @@ import AuthContext from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import moment from 'moment'
 
+import InkPreloader from '../components/InkPreloader'
+
 let getDateCreated = poem => {
     return moment.parseZone(poem.date_created).local().calendar()
 }
@@ -41,7 +43,7 @@ const PoemPage = () => {
     return (
         <div>
             { loading && (
-                <p>Loading...</p>
+                <InkPreloader />
             )}
             { poem ? (
                 <div>

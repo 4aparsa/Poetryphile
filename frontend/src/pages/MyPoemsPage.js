@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import moment from 'moment'
 
+import InkPreloader from '../components/InkPreloader'
+
 let getTitle = (poem) => {
     let title = poem.title
     if (title.length > 45) {
@@ -34,6 +36,10 @@ const MyPoemsPage = () => {
     let { user, authTokens } = useContext(AuthContext)
     let [poems, setPoems] = useState([])
     let [loading, setLoading] = useState(true)
+    let [loadingMore, setLoadingMore] = useState(false)
+    let [nextUrl, setNextUrl] = useState('http://localhost:8000/api/poems/my_poems/')
+    let [count, setCount] = useState(0)
+    let [hasMorePoems, setHasMorePoems] = useState(false)
 
     const navigate = useNavigate();
 
@@ -42,15 +48,21 @@ const MyPoemsPage = () => {
     }, [])
 
     let getPoems = async () => {
-        let response = await fetch('http://localhost:8000/api/poems/my_poems/', {
+        setLoadingMore(true)
+        let response = await fetch(nextUrl, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authTokens.access}`
             }
         })
         let data = await response.json()
+        let hasMorePoems = data.next ? true : false
         if(response.status === 200){
-            setPoems(data)
+            setPoems(poems.concat(data.results))
+            setNextUrl(data.next)
+            setHasMorePoems(hasMorePoems)
+            setLoadingMore(false)
+            setCount(data.count)
             setLoading(false)
         }
     }
@@ -89,6 +101,7 @@ const MyPoemsPage = () => {
                     <h1>
                         My Poems Page. 
                     </h1>
+                    <p>Listing {poems.length} of {count} total poems.</p>
                     { user && (
                         <p>{generateGreeting()} {user.pen_name}</p>
                     )}
@@ -103,10 +116,21 @@ const MyPoemsPage = () => {
                             </div>
                         )) }
                     </div>
+                    { hasMorePoems ? (
+                        <div>
+                            { loadingMore ? (
+                                <p>Loading more...</p>
+                            ) : (
+                                <button onClick={getPoems}>Load More</button>
+                            )}
+                        </div>
+                    ) : (
+                        <p>No more poems.</p>
+                    )}
                     <button onClick={createPoem}>Create poem</button>
                 </div>
             ) : (
-                <p>Loading...</p>
+                <InkPreloader />
             )}
         </div>
     )
