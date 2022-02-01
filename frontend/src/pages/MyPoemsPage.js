@@ -35,7 +35,7 @@ let generateGreeting = () => {
 const MyPoemsPage = () => {
     let { user, authTokens } = useContext(AuthContext)
     let [poems, setPoems] = useState([])
-    let [loading, setLoading] = useState(true)
+    let [loadingMyPoems, setLoadingMyPoems] = useState(true)
     let [loadingMore, setLoadingMore] = useState(false)
     let [nextUrl, setNextUrl] = useState('http://localhost:8000/api/poems/my_poems/')
     let [count, setCount] = useState(0)
@@ -44,10 +44,10 @@ const MyPoemsPage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        getPoems()
+        getMyPoems()
     }, [])
 
-    let getPoems = async () => {
+    let getMyPoems = async () => {
         setLoadingMore(true)
         let response = await fetch(nextUrl, {
             method: 'GET',
@@ -57,13 +57,16 @@ const MyPoemsPage = () => {
         })
         let data = await response.json()
         let hasMorePoems = data.next ? true : false
-        if(response.status === 200){
+        if(response.status === 200) {
+            console.log(data.message)
             setPoems(poems.concat(data.results))
             setNextUrl(data.next)
             setHasMorePoems(hasMorePoems)
             setLoadingMore(false)
             setCount(data.count)
-            setLoading(false)
+            setLoadingMyPoems(false)
+        } else {
+            console.log(data.message)
         }
     }
 
@@ -76,7 +79,10 @@ const MyPoemsPage = () => {
         })
         let data = await response.json()
         if(response.status === 200){
+            console.log(data.message)
             navigate(`/poems/${data.id}`)
+        } else {
+            console.log(data.message)
         }
     }
 
@@ -88,15 +94,18 @@ const MyPoemsPage = () => {
             }
         })
         let data = await response.json()
-        if (response.status == 200) {
-            let filteredPoems = poems.filter(poem => poem.id !== poemId)
-            setPoems(filteredPoems)
+        if (response.status === 200) {
+            let remainingPoems = poems.filter(poem => poem.id !== poemId)
+            setPoems(remainingPoems)
+            setCount(count - 1)
+        } else {
+            console.log(data.message)
         }
     }
 
     return (
         <div>
-            { loading == false ? (
+            { loadingMyPoems === false ? (
                 <div>
                     <h1>
                         My Poems Page. 
@@ -112,6 +121,7 @@ const MyPoemsPage = () => {
                                 {poem.text}
                                 {getDateCreated(poem)}
                                 <Link to={`/poems/${poem.id}`}>View</Link>
+                                <Link to={`/poems/${poem.id}/edit`}>Edit</Link>
                                 <button onClick={() => deletePoem(poem.id)}>Delete</button>
                             </div>
                         )) }
@@ -121,7 +131,7 @@ const MyPoemsPage = () => {
                             { loadingMore ? (
                                 <p>Loading more...</p>
                             ) : (
-                                <button onClick={getPoems}>Load More</button>
+                                <button onClick={getMyPoems}>Load More</button>
                             )}
                         </div>
                     ) : (

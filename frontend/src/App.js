@@ -8,6 +8,7 @@ import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import MyPoemsPage from './pages/MyPoemsPage';
 import PoemPage from './pages/PoemPage';
+import EditPoemPage from './pages/EditPoemPage';
 import Header from './components/Header';
 
 function App() {
@@ -24,6 +25,9 @@ function App() {
               <Route path='my_poems' element={<MyPoemsPage />} />
             </Route>
             <Route path='poems/:poemId' element={<PoemPage />} />
+            <Route element={<RequiresAuth />}>
+              <Route path='poems/:poemId/edit' element={<EditPoemPage />} />
+            </Route>
             <Route
               path="*"
               element={

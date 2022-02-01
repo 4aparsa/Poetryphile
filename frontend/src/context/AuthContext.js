@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
     let [authTokens, setAuthTokens] = useState(() => localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')) : null)
     let [user, setUser] = useState(() => localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null)
-    let [loading, setLoading] = useState(true)
+    let [loadingAuthStatus, setLoadingAuthStatus] = useState(true)
 
     const navigate = useNavigate();
 
@@ -24,14 +24,17 @@ export const AuthProvider = ({ children }) => {
             body: JSON.stringify({ 'email': e.target.email.value, 'pen_name': e.target.penName.value, 'password': e.target.password.value, 're_password': e.target.rePassword.value })
         })
         let data = await response.json()
-        if (response.status == 201) {
+        if (response.status === 201) {
+            console.log(data.message)
             navigate('/login')
+        } else {
+            console.log(data.message)
         }
     }
 
     let loginUser = async (e) => {
         e.preventDefault()
-        let response = await fetch('http://localhost:8000/api/accounts/token/', {
+        let response = await fetch('http://localhost:8000/api/accounts/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -39,11 +42,14 @@ export const AuthProvider = ({ children }) => {
             body: JSON.stringify({ 'pen_name': e.target.penName.value, 'password': e.target.password.value })
         })
         let data = await response.json()
-        if (response.status == 200) {
+        if (response.status === 200) {
+            console.log(data.message)
             setAuthTokens(data)
             setUser(jwt_decode(data.access))
             localStorage.setItem('authTokens', JSON.stringify(data))
             navigate('/')
+        } else {
+            console.log(data.message)
         }
     }
 
@@ -63,7 +69,7 @@ export const AuthProvider = ({ children }) => {
         })
         let data = await response.json()
 
-        if (response.status == 200) {
+        if (response.status === 200) {
             setAuthTokens(data)
             setUser(jwt_decode(data.access))
             localStorage.setItem('authTokens', JSON.stringify(data))
@@ -71,8 +77,8 @@ export const AuthProvider = ({ children }) => {
              logoutUser()
         }
 
-        if (loading) {
-            setLoading(false)
+        if (loadingAuthStatus) {
+            setLoadingAuthStatus(false)
         }
     }
 
@@ -85,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        if (loading) {
+        if (loadingAuthStatus) {
             updateToken()
         }
         let fourMinutes = 1000 * 60 * 4
@@ -95,11 +101,11 @@ export const AuthProvider = ({ children }) => {
             } 
         }, fourMinutes)
         return () => clearInterval(interval)
-    }, [authTokens, loading])
+    }, [authTokens, loadingAuthStatus])
 
     return (
         <AuthContext.Provider value={contextData}>
-            {loading ? null : children}
+            {loadingAuthStatus ? null : children}
         </AuthContext.Provider>
     )
 }

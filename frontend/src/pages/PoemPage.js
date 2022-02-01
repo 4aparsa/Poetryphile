@@ -14,7 +14,7 @@ const PoemPage = () => {
     let { poemId } = useParams()
     let { user, authTokens } = useContext(AuthContext)
     let [poem, setPoem] = useState(null)
-    let [loading, setLoading] = useState(true)
+    let [loadingPoem, setLoadingPoem] = useState(true)
 
     const navigate = useNavigate();
 
@@ -22,7 +22,9 @@ const PoemPage = () => {
         getPoem()
     }, [poemId, user])
 
-    let config = { method: 'GET' }
+    let config = { 
+        method: 'GET'
+    }
     if (user) {
         config.headers = { 'Authorization': `Bearer ${authTokens?.access}` }
     }
@@ -31,18 +33,20 @@ const PoemPage = () => {
         let data = await response.json()
         if(response.status === 200){
             setPoem(data)
-            setLoading(false)
-        } else if (response.status == 403) {
+            setLoadingPoem(false)
+        } else if (response.status === 403) {
             setPoem(null);
-            setLoading(false)
-        } else {
+            setLoadingPoem(false)
+        } else if (response.status === 404) {
             navigate('/404')
+        } else {
+            console.log(data.message)
         }
     }
 
     return (
         <div>
-            { loading && (
+            { loadingPoem && (
                 <InkPreloader />
             )}
             { poem ? (
