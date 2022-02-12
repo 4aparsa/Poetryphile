@@ -22,14 +22,13 @@ const PoemPage = () => {
         getPoem()
     }, [poemId, user])
 
-    let config = { 
-        method: 'GET'
-    }
-    if (user) {
-        config.headers = { 'Authorization': `Bearer ${authTokens?.access}` }
-    }
     let getPoem = async () => {
-        let response = await fetch(`http://localhost:8000/api/poems/${poemId}/`, config)
+        let response = await fetch(`http://localhost:8000/api/poems/${poemId}/`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authTokens?.access}`,
+            }
+        })
         let data = await response.json()
         if(response.status === 200){
             setPoem(data)

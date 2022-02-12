@@ -5,15 +5,15 @@ import AuthContext from '../context/AuthContext';
 
 import InkPreloader from '../components/InkPreloader'
 
-const SavingPoemState = Object.freeze({
+const SavingPoemState = {
     NOT_SAVED: 0,
     SAVING: 1,
     SAVED: 2
-});
+}
 
 const EditPoemPage = () => {
     let { poemId } = useParams()
-    let { user, authTokens } = useContext(AuthContext)
+    let { authTokens } = useContext(AuthContext)
     let [poem, setPoem] = useState(null)
     let [loadingPoemData, setLoadingPoemData] = useState(true)
     let [savingPoem, setSavingPoem] = useState(SavingPoemState.SAVED)
@@ -30,7 +30,7 @@ const EditPoemPage = () => {
 
     useEffect(() => {
         getPoem()
-    }, [poemId, user, authTokens])
+    }, [poemId])
 
     let getPoem = async () => {
         let response = await fetch(`http://localhost:8000/api/poems/${poemId}/`, {
@@ -53,7 +53,7 @@ const EditPoemPage = () => {
         }
     }
 
-    let resizePoemTextEditor = (poemTextEditor) => {
+    let resizePoemTextEditor = poemTextEditor => {
         const target = poemTextEditor.target ? poemTextEditor.target : poemTextEditor;
         target.style.height = '100px';
         target.style.height = `${target.scrollHeight}px`
