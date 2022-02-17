@@ -21,6 +21,9 @@ module.exports = {
         'white': '#ffffff'
       }
     },
+    container: {
+      center: true,
+    }
   },
   plugins: [
     require('@tailwindcss/forms')

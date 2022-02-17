@@ -1,8 +1,9 @@
+import re
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 
@@ -10,12 +11,21 @@ from .serializers import PoemSerializer
 
 from .models import Poem
 
-class AllowAnyJWTAuthentication(JWTAuthentication):
+class AllowAny(JWTAuthentication):
     def authenticate(self, request):
         try:
             return super().authenticate(request=request)
         except InvalidToken:
             return None
+
+class LimitOffsetPagination(LimitOffsetPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'next': self.get_next_link(),
+            'count': self.count,
+            'poems': data,
+            'limit': self.limit
+        })
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -42,14 +52,14 @@ def getMyPoems(request):
     No authorization required
     """
     user = request.user
-    paginator = PageNumberPagination()
+    paginator = LimitOffsetPagination()
     poems = user.poem_set.all().order_by('-date_created')
     poems_page = paginator.paginate_queryset(poems, request)
     serializer = PoemSerializer(poems_page, many=True)
     return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
-@authentication_classes([AllowAnyJWTAuthentication])
+@authentication_classes([AllowAny])
 def getPoem(request, pk):
     """
     Get Poem
@@ -74,7 +84,7 @@ def getPoem(request, pk):
 @permission_classes([IsAuthenticated])
 def editPoem(request, pk):
     """
-    Get Poem Editor
+    Poem Editor
     Authentication required
     Authorization required
     """
@@ -117,4 +127,4 @@ def deletePoem(request, pk):
     except:
         return Response({
             'message': 'The poem you are looking for does not exist.'
-        }, status=status.HTTP_403_FORBIDDEN)
+        }, status=status.HTTP_404_NOT_FOUND)

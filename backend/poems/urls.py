@@ -6,5 +6,5 @@ urlpatterns = [
     path('create/', views.createPoem),
     path('<str:pk>/delete/', views.deletePoem),
     path('<str:pk>/', views.getPoem),
-    path('<str:pk>/edit/', views.editPoem),
+    path('<str:pk>/edit/', views.editPoem)
 ]

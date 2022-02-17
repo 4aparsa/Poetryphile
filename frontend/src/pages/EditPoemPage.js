@@ -5,11 +5,11 @@ import AuthContext from '../context/AuthContext';
 
 import InkPreloader from '../components/InkPreloader'
 
-const SavingPoemState = {
+const SavingPoemState = Object.freeze({
     NOT_SAVED: 0,
     SAVING: 1,
     SAVED: 2
-}
+})
 
 const EditPoemPage = () => {
     let { poemId } = useParams()

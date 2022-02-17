@@ -1,24 +1,39 @@
 import { useState, useEffect, useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import AuthContext from '../context/AuthContext';
 import moment from 'moment'
+
+import AuthContext from '../context/AuthContext';
 
 import InkPreloader from '../components/InkPreloader'
 
-let getTitle = (poem) => {
+let getTitle = poem => {
     let title = poem.title
+
     if (title.length > 45) {
         return title.slice(0, 45) + '...'
     }
     return title
 }
 
+let getText = poem => {
+    let text = poem.text
+
+    if (text.length > 45) {
+        return text.slice(0, 45) + '...'
+    } else {
+        return text
+    }
+}
+
 let getDateCreated = poem => {
     return moment.parseZone(poem.date_created).local().calendar()
 }
 
-let generateGreeting = () => {
+let getDateUpdated = poem => {
+    return moment.parseZone(poem.date_updated).local().calendar()
+}
 
+let generateGreeting = () => {
     let currentHour = moment().format("HH");
   
     if (currentHour >= 3 && currentHour < 12){
@@ -30,26 +45,34 @@ let generateGreeting = () => {
     } else if (currentHour >= 20 || currentHour < 3){
         return "Good Night,";
     }
-  }
+}
+
+const initialQueryLimit = 10
+const intialQueryOffset = 0
+const initialQueryUrl = `http://localhost:8000/api/poems/my_poems/?limit=${initialQueryLimit}&offset=${intialQueryOffset}`
 
 const MyPoemsPage = () => {
+
+    const navigate = useNavigate();
+
     let { user, authTokens } = useContext(AuthContext)
     let [poems, setPoems] = useState([])
     let [loadingMyPoems, setLoadingMyPoems] = useState(true)
     let [loadingMore, setLoadingMore] = useState(false)
-    let [nextUrl, setNextUrl] = useState('http://localhost:8000/api/poems/my_poems/')
-    let [count, setCount] = useState(0)
+    let [queryUrl, setQueryUrl] = useState(initialQueryUrl)
+    let [queryLimit, setQueryLimit] = useState(initialQueryLimit);
     let [hasMorePoems, setHasMorePoems] = useState(false)
-
-    const navigate = useNavigate();
+    let [poemCount, setPoemCount] = useState(0)
 
     useEffect(() => {
-        getMyPoems()
+        getMyPoems(true)
     }, [])
 
-    let getMyPoems = async () => {
-        setLoadingMore(true)
-        let response = await fetch(nextUrl, {
+    let getMyPoems = async isInitialLoad => {
+        if (!isInitialLoad) {
+            setLoadingMore(true)
+        }
+        let response = await fetch(queryUrl, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authTokens.access}`
@@ -58,13 +81,17 @@ const MyPoemsPage = () => {
         let data = await response.json()
         let hasMorePoems = data.next ? true : false
         if(response.status === 200) {
-            console.log(data.message)
-            setPoems(poems.concat(data.results))
-            setNextUrl(data.next)
+            setPoems(poems.concat(data.poems))
+            if (isInitialLoad) {
+                setLoadingMyPoems(false)
+            }
+            if (!isInitialLoad) {
+                setLoadingMore(false)
+            }
+            setQueryUrl(data.next)
             setHasMorePoems(hasMorePoems)
-            setLoadingMore(false)
-            setCount(data.count)
-            setLoadingMyPoems(false)
+            setPoemCount(data.count)
+            setQueryLimit(data.limit);
         } else {
             console.log(data.message)
         }
@@ -95,27 +122,19 @@ const MyPoemsPage = () => {
         })
         let data = await response.json()
         if (response.status === 200) {
-            let remainingPoems = poems.filter(poem => poem.id !== poemId)
-            setPoems(remainingPoems)
-            setCount(count - 1)
+            let response = await fetch(`http://localhost:8000/api/poems/my_poems/?limit=${queryLimit + initialQueryLimit}&offset=${intialQueryOffset}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authTokens.access}`
+                } 
+            })
+            let data = await response.json()
+            setPoems(data.poems)
+            setPoemCount(data.count)
         } else {
             console.log(data.message)
         }
     }
-
-
-    const people = [
-        {
-          name: 'Jane Cooper',
-          title: 'Regional Paradigm Technician',
-          department: 'Optimization',
-          role: 'Admin',
-          email: 'jane.cooper@example.com',
-          image:
-            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60',
-        },
-        // More people...
-      ]
 
     return (
         <div>
@@ -124,11 +143,11 @@ const MyPoemsPage = () => {
                     <h1>
                         My Poems Page. 
                     </h1>
-                    <p>Listing {poems.length} of {count} total poems.</p>
+                    <p>Listing {poems.length} of {poemCount} total poems.</p>
                     { user && (
                         <p>{generateGreeting()} {user.pen_name}</p>
                     )}
-                    <div className="flex flex-col">
+                    <div className="flex flex-col container">
                         <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                             <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
                                 <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
@@ -145,23 +164,36 @@ const MyPoemsPage = () => {
                                                 scope="col"
                                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                             >
+                                                Text
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
+                                                Last Edited
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
                                                 Status
                                             </th>
-                                            <th scope="col" className="relative px-6 py-3">
-                                                <span className="sr-only">Edit</span>
-                                            </th>
+                                                <th scope="col" className="relative px-6 py-3">
+                                                    <span className="sr-only">Edit</span>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="bg-white divide-y divide-gray-200">
                                             {poems.map((poem) => (
                                                 <tr key={poem.id}>
                                                     <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex items-center">
-                                                            <div className="ml-4">
-                                                                <div className="text-sm font-medium text-gray-900">{poem.title}</div>
-                                                                {/* <div className="text-sm text-gray-500">{poem.text}</div> */}
-                                                            </div>
-                                                        </div>
+                                                        <div className="text-sm font-medium text-gray-900">{getTitle(poem)}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm text-gray-500">{getText(poem)}</div>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <div className="text-sm text-gray-500">{getDateUpdated(poem)}</div>
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap">
                                                         { poem.is_published ? (
@@ -175,12 +207,12 @@ const MyPoemsPage = () => {
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                        <Link to={`/poems/${poem.id}/edit`} className="text-primary-500 hover:text-primary-600 px-2">
-                                                            Edit
-                                                        </Link>
-                                                        <button onClick={() => deletePoem(poem.id)}>
+                                                        <button className = "px-3" onClick={() => deletePoem(poem.id)}>
                                                             Delete
                                                         </button>
+                                                        <Link to={`/poems/${poem.id}/edit`} className="text-primary-500 hover:text-primary-600">
+                                                            Edit
+                                                        </Link>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -190,28 +222,16 @@ const MyPoemsPage = () => {
                             </div>
                         </div>
                     </div>
-                    {/* <div>
-                        { poems.map(poem => (
-                            <div key = {poem.id}>
-                                {getTitle(poem)}
-                                {poem.text}
-                                {getDateCreated(poem)}
-                                <Link to={`/poems/${poem.id}`}>View</Link>
-                                <Link to={`/poems/${poem.id}/edit`}>Edit</Link>
-                                <button onClick={() => deletePoem(poem.id)}>Delete</button>
-                            </div>
-                        )) }
-                    </div> */}
                     { hasMorePoems ? (
                         <div>
                             { loadingMore ? (
                                 <p>Loading more...</p>
                             ) : (
-                                <button onClick={getMyPoems}>Load More</button>
+                                <button onClick={() => getMyPoems(false)}>Load More</button>
                             )}
                         </div>
                     ) : (
-                        <p>No more poems.</p>
+                        <p>The End.</p>
                     )}
                     <button onClick={createPoem}>Create poem</button>
                 </div>
