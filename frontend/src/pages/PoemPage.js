@@ -43,6 +43,21 @@ const PoemPage = () => {
         }
     }
 
+    let giveInk = async () => {
+        let response = await fetch(`http://localhost:8000/api/poems/${poemId}/give_ink/`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authTokens?.access}`,
+            }
+        })
+        let data = await response.json()
+        if(response.status === 200){
+            console.log(data.inks.length)
+        } else {
+            console.log(data.message)
+        }
+    }
+
     return (
         <div>
             { loadingPoem && (
@@ -56,6 +71,12 @@ const PoemPage = () => {
                     <p>Written by {poem.user.pen_name}</p>
                     <p>{poem.text}</p>
                     <p>{getDateCreated(poem)}</p>
+                    { user && (
+                        <button onClick = {giveInk}>
+                            Give ink
+                        </button>
+                    )}
+                    <p>{poem.inks.length} inks</p>
                 </div>
             ) : (
                 <h1>You do not have access to view this poem.</h1>

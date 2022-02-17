@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
 
     const navigate = useNavigate();
 
-    let signupUser = async (e) => {
+    let signupUser = async e => {
         e.preventDefault()
         let response = await fetch('http://localhost:8000/api/accounts/signup/', {
             method: 'POST',
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    let loginUser = async (e) => {
+    let loginUser = async e => {
         e.preventDefault()
         let response = await fetch('http://localhost:8000/api/accounts/login/', {
             method: 'POST',
@@ -54,9 +54,11 @@ export const AuthProvider = ({ children }) => {
     }
 
     let logoutUser = () => {
+        setLoadingAuthStatus(true)
         setAuthTokens(null)
         setUser(null)
         localStorage.removeItem('authTokens')
+        setLoadingAuthStatus(false)
     }
 
     let updateToken = async () => {

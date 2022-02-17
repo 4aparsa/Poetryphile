@@ -1,5 +1,8 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework import status
 
 from .models import UserAccount
@@ -9,6 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def loginUser(request):
     """
     Login user
@@ -46,6 +50,7 @@ def loginUser(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def signupUser(request):
     """
     Signup user
@@ -80,3 +85,10 @@ def signupUser(request):
         return Response({
             'message': 'Something went wrong.'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class JWTAuthentication(JWTAuthentication):
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request=request)
+        except InvalidToken:
+            return None
