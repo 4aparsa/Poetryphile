@@ -49,6 +49,7 @@ def getMyPoems(request):
     return paginator.get_paginated_response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 @authentication_classes([JWTAuthentication])
 def getPoem(request, pk):
     """
@@ -118,7 +119,7 @@ def deletePoem(request, pk):
         }, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['PUT'])
-def giveInk(request, pk):
+def givePoemInk(request, pk):
     """
     Ink Poem
     Authentication required
@@ -138,6 +139,34 @@ def giveInk(request, pk):
         else:
             return Response({
                 'message': 'This poem is not published yet.'
+            }, status=status.HTTP_403_FORBIDDEN)
+    except:
+        return Response({
+            'message': 'The poem you are looking for does not exist.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['PUT'])
+def publishPoem(request, pk):
+    """
+    Publish poem
+    Authentication required
+    Authorization required
+    """
+    try:
+        poem = Poem.objects.get(id=pk)
+        if poem.user == request.user:
+            poem.is_published = True
+            serializer = PoemSerializer(instance=poem, data={ 'is_published': True }, partial=True)
+
+            if serializer.is_valid():
+                serializer.save()
+
+            return Response({
+                'message': 'Your poem has been published.'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'message': 'You do not have permission to publish this poem.'
             }, status=status.HTTP_403_FORBIDDEN)
     except:
         return Response({

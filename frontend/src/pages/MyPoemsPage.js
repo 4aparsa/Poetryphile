@@ -107,7 +107,7 @@ const MyPoemsPage = () => {
         let data = await response.json()
         if(response.status === 200){
             console.log(data.message)
-            navigate(`/poems/${data.id}`)
+            navigate(`/poems/${data.id}/edit/`)
         } else {
             console.log(data.message)
         }

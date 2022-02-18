@@ -91,6 +91,21 @@ const EditPoemPage = () => {
         }
     }
 
+    let publishPoem = async () => {
+        let response = await fetch(`http://localhost:8000/api/poems/${poemId}/publish/`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${authTokens?.access}`,
+            }
+        })
+        let data = await response.json()
+        if(response.status === 200){
+            console.log(data)
+        } else {
+            console.log(data.message)
+        }
+    }
+
     return (
         <div>
             { loadingPoemData && (
@@ -121,6 +136,10 @@ const EditPoemPage = () => {
                         style = {{ "minHeight": "100px" }}
                         onChange={e => onChange(e)}>
                     </textarea>
+
+                    <button onClick={publishPoem}>
+                        Publish
+                    </button>
                 </div>
             ) : (
                 <h1>You do not have access to edit this poem.</h1>

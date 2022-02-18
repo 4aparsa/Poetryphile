@@ -5,7 +5,7 @@ from accounts.models import UserAccount
 class Ink(models.Model):
     inker = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     poem = models.ForeignKey('Poem', on_delete=models.CASCADE)
-    date_ink_given = models.DateTimeField(auto_now_add=True)
+    date_given = models.DateTimeField(auto_now_add=True)
 
 class Poem(models.Model):
     user = models.ForeignKey(UserAccount, related_name='poems', on_delete=models.CASCADE, null=True)

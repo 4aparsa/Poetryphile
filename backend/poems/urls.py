@@ -7,5 +7,6 @@ urlpatterns = [
     path('<str:pk>/delete/', views.deletePoem),
     path('<str:pk>/', views.getPoem),
     path('<str:pk>/edit/', views.editPoem),
-    path('<str:pk>/give_ink/', views.giveInk)
+    path('<str:pk>/give_ink/', views.givePoemInk),
+    path('<str:pk>/publish/', views.publishPoem)
 ]

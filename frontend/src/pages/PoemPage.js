@@ -76,7 +76,7 @@ const PoemPage = () => {
                             Give ink
                         </button>
                     )}
-                    <p>{poem.inks.length} inks</p>
+                    <p>{poem.ink_count} inks</p>
                 </div>
             ) : (
                 <h1>You do not have access to view this poem.</h1>
@@ -85,4 +85,4 @@ const PoemPage = () => {
     )
 }
 
-export default PoemPage; 
+export default PoemPage;
