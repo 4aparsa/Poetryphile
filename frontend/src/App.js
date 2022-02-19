@@ -10,6 +10,8 @@ import MyPoemsPage from './pages/MyPoemsPage';
 import PoemPage from './pages/PoemPage';
 import EditPoemPage from './pages/EditPoemPage';
 import Header from './components/Header';
+import ResetPasswordRequestPage from './pages/ResetPasswordRequestPage';
+import ResetPasswordConfirmPage from './pages/ResetPasswordConfirmPage';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
             <Route path='about' element={<AboutPage />} />
             <Route path='signup' element={<SignupPage />} />
             <Route path='login' element={<LoginPage />} />
+            <Route path='reset_password_request' element={<ResetPasswordRequestPage />} />
+            <Route path=':uidb64/:token/reset_password_confirm' element={<ResetPasswordConfirmPage />} />
             <Route element={<RequiresAuth />}>
               <Route path='my_poems' element={<MyPoemsPage />} />
             </Route>
