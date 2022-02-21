@@ -3,9 +3,15 @@ from django.utils import timezone
 from accounts.models import UserAccount
 
 class Ink(models.Model):
-    inker = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserAccount, on_delete=models.CASCADE)
     poem = models.ForeignKey('Poem', on_delete=models.CASCADE)
     date_given = models.DateTimeField(auto_now_add=True)
+
+class Comment(models.Model):
+    date_created = models.DateTimeField(auto_now_add=True)
+    text = models.TextField(blank=False)
+    user = models.ForeignKey(UserAccount, related_name='comments', on_delete=models.CASCADE)
+    poem = models.ForeignKey('Poem', related_name='comments', on_delete=models.CASCADE)
 
 class Poem(models.Model):
     user = models.ForeignKey(UserAccount, related_name='poems', on_delete=models.CASCADE, null=True)

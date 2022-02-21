@@ -5,6 +5,11 @@ import AuthContext from '../context/AuthContext';
 
 import InkPreloader from '../components/InkPreloader'
 
+import {
+    CheckIcon,
+    LinkIcon,
+  } from '@heroicons/react/solid'
+
 const SavingPoemState = Object.freeze({
     NOT_SAVED: 0,
     SAVING: 1,
@@ -136,10 +141,16 @@ const EditPoemPage = () => {
                         style = {{ "minHeight": "100px" }}
                         onChange={e => onChange(e)}>
                     </textarea>
-
-                    <button onClick={publishPoem}>
-                        Publish
-                    </button>
+                    <span className="sm:ml-3">
+                        <button
+                            onClick={publishPoem}
+                            type="button"
+                            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        >
+                            <CheckIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                            Publish
+                        </button>
+                    </span>
                 </div>
             ) : (
                 <h1>You do not have access to edit this poem.</h1>

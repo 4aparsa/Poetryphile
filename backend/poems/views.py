@@ -8,7 +8,7 @@ from accounts.views import JWTAuthentication
 
 from .serializers import PoemSerializer
 
-from .models import Poem
+from .models import Poem, Comment
 
 class LimitOffsetPagination(LimitOffsetPagination):
     def get_paginated_response(self, data):
@@ -128,19 +128,15 @@ def givePoemInk(request, pk):
     try:
         poem = Poem.objects.get(id=pk)
         if poem.is_published:
-            if request.user not in poem.inks.all():
-                poem.inks.add(request.user)
-                serializer = PoemSerializer(poem, many=False)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response({
-                    'message': 'You have already given ink to this poem'
-                }, status=status.HTTP_400_BAD_REQUEST)
+            poem.inks.add(request.user)
+            serializer = PoemSerializer(poem, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({
                 'message': 'This poem is not published yet.'
             }, status=status.HTTP_403_FORBIDDEN)
-    except:
+    except Exception as e:
+        print(e)
         return Response({
             'message': 'The poem you are looking for does not exist.'
         }, status=status.HTTP_404_NOT_FOUND)
@@ -168,6 +164,36 @@ def publishPoem(request, pk):
                 'message': 'You do not have permission to publish this poem.'
             }, status=status.HTTP_403_FORBIDDEN)
     except:
+        return Response({
+            'message': 'The poem you are looking for does not exist.'
+        }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+def commentOnPoem(request, pk):
+    """
+    Publish poem
+    Authentication required
+    No authorization required
+    """
+    try:
+        poem = Poem.objects.get(id=pk)
+        if poem.is_published:
+            user = request.user
+            text = request.data.get('text')
+            comment = Comment.objects.create(
+                text = text,
+                user = user,
+                poem = poem
+            )
+            return Response({ 
+                'message': 'Comment has been created.'
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                'message': 'You cannot add comments to this pome because it is not published.'
+            }, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        print(e)
         return Response({
             'message': 'The poem you are looking for does not exist.'
         }, status=status.HTTP_404_NOT_FOUND)

@@ -15,12 +15,13 @@ const PoemPage = () => {
     let { user, authTokens } = useContext(AuthContext)
     let [poem, setPoem] = useState(null)
     let [loadingPoem, setLoadingPoem] = useState(true)
+    let [comment, setComment] = useState({text: ""})
 
     const navigate = useNavigate();
 
     useEffect(() => {
         getPoem()
-    }, [poemId, user])
+    }, [poemId, poem, user])
 
     let getPoem = async () => {
         let response = await fetch(`http://localhost:8000/api/poems/${poemId}/`, {
@@ -33,6 +34,7 @@ const PoemPage = () => {
         if(response.status === 200){
             setPoem(data)
             setLoadingPoem(false)
+            console.log(data)
         } else if (response.status === 403) {
             setPoem(null);
             setLoadingPoem(false)
@@ -52,7 +54,26 @@ const PoemPage = () => {
         })
         let data = await response.json()
         if(response.status === 200){
-            console.log(data.inks.length)
+            console.log(data.message)
+        } else {
+            console.log(data.message)
+        }
+    }
+
+    const onChange = e => setComment({[e.target.name]: e.target.value });
+
+    let postComment = async () => {
+        let response = await fetch(`http://localhost:8000/api/poems/${poemId}/comment/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`,
+            },
+            body: JSON.stringify(comment)
+        })
+        let data = await response.json()
+        if(response.status === 200){
+            console.log(data.message)
         } else {
             console.log(data.message)
         }
@@ -77,6 +98,21 @@ const PoemPage = () => {
                         </button>
                     )}
                     <p>{poem.ink_count} inks</p>
+                    {user && (
+                        <div>
+                            <input onChange={e => onChange(e)} name = 'text' type = 'text'></input>
+                            <button onClick = {postComment}>
+                                Post
+                            </button>
+                        </div>
+                    )}
+                    <p>{poem.comment_count} comments</p>
+                    {poem.comments.map((comment) => (
+                        <div id = {comment.id}>
+                            <p>Posted by: {comment.user.pen_name}</p>
+                            <p>{comment.text}</p>
+                        </div>
+                    ))}
                 </div>
             ) : (
                 <h1>You do not have access to view this poem.</h1>
